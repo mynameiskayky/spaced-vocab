@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { dbConnection } from "@/config/database.config";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { RowDataPacket } from "mysql2/promise";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -16,12 +17,12 @@ export async function POST(req: NextRequest) {
     const { email, password } = await req.json();
 
     const connection = await dbConnection();
-    const [user] = await connection.query(
+    const [users] = await connection.query<RowDataPacket[]>(
       "SELECT * FROM Users WHERE email = ?",
       [email]
     );
-
-    const { id, email: userEmail, password: userPassword } = user[0];
+    const user = users[0] as User;
+    const { id, email: userEmail, password: userPassword } = user;
 
     const isPasswordValid = await bcrypt.compare(password, userPassword);
 
