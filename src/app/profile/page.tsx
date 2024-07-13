@@ -30,11 +30,22 @@ export default function Profile() {
     }
 
     setTimeout(() => {
-      const user = JSON.parse(atob(token.split(".")[1]));
-      setUser(user);
+      try {
+        const user = JSON.parse(atob(token.split(".")[1])) as User;
+        setUser(user);
+      } catch (error) {
+        console.error("Failed to parse the token:", error);
+        router.push("/login");
+        return;
+      }
       setLoading(false);
     }, 1500);
   }, [router]);
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("token");
+    router.push("/login");
+  };
 
   if (loading) {
     return (
@@ -50,10 +61,13 @@ export default function Profile() {
     );
   }
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("token");
-    router.push("/login");
-  };
+  if (!user) {
+    return (
+      <div className="flex min-h-[100dvh] items-center justify-center bg-background">
+        <p>Error loading user profile. Please try again.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background">
