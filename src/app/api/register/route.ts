@@ -4,13 +4,13 @@ import bcrypt from "bcryptjs";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    const { username, email, password } = await req.json();
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const connection = await dbConnection();
     await connection.query(
-      "INSERT INTO Users (email, password) VALUES (?, ?)",
-      [email, hashedPassword]
+      "INSERT INTO Users (username, email, password_hash) VALUES (?, ?, ?)",
+      [username, email, hashedPassword]
     );
 
     return NextResponse.json(

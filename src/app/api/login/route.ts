@@ -9,7 +9,8 @@ const JWT_SECRET = process.env.JWT_SECRET;
 interface User {
   id: number;
   email: string;
-  password: string;
+  username: string;
+  password_hash: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -22,7 +23,12 @@ export async function POST(req: NextRequest) {
       [email]
     );
     const user = users[0] as User;
-    const { id, email: userEmail, password: userPassword } = user;
+    const {
+      id,
+      username,
+      email: userEmail,
+      password_hash: userPassword,
+    } = user;
 
     const isPasswordValid = await bcrypt.compare(password, userPassword);
 
@@ -33,7 +39,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const token = jwt.sign({ id, email: userEmail }, JWT_SECRET, {
+    const token = jwt.sign({ id, username, email: userEmail }, JWT_SECRET, {
       expiresIn: "1h",
     });
 

@@ -1,6 +1,5 @@
 "use client";
 import { z } from "zod";
-import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
@@ -12,7 +11,6 @@ import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -29,61 +27,79 @@ import {
 import { Eye, EyeClosed } from "@phosphor-icons/react";
 
 const FormSchema = z.object({
+  username: z.string().min(1, { message: "Username is required." }),
   email: z.string().email({ message: "Invalid email address." }),
   password: z
     .string()
     .min(6, { message: "Password must be at least 6 characters." }),
 });
 
-export default function Login() {
+export default function Register() {
   const router = useRouter();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
+      username: "",
       email: "",
       password: "",
     },
   });
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    const { email, password } = data;
+    const { username, email, password } = data;
 
-    const result = await fetch("/api/login", {
+    const result = await fetch("/api/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ username, email, password }),
     });
 
-    if (result.status === 200) {
-      const { token } = await result.json();
-      sessionStorage.setItem("token", token);
-      router.push("/profile");
+    if (result.status === 201) {
+      router.push("/login");
     } else {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
-        description: "Invalid credentials",
+        description: "Could not register.",
         action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
     }
   }
 
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-background">
+    <div className="flex min-h-[100dvh] w-full items-center justify-center bg-background">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">Register</CardTitle>
           <CardDescription>
-            Enter your email and password to access your account.
+            Create a new account to get started.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="username"
+                        type="text"
+                        placeholder="Enter your username"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="email"
@@ -136,18 +152,10 @@ export default function Login() {
                 )}
               />
               <Button type="submit" className="w-full">
-                Sign in
+                Register
               </Button>
             </form>
           </Form>
-          <div className="text-center">
-            <span className="text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
-            </span>
-            <Link href="/register" className="text-sm text-primary">
-              Sign up
-            </Link>
-          </div>
         </CardContent>
       </Card>
     </div>

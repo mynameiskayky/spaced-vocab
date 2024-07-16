@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 interface User {
   id: number;
+  username: string;
   email: string;
 }
 
@@ -80,6 +81,9 @@ export default function Profile() {
           <div className="space-y-2">
             <p>
               <strong>ID:</strong> {user.id}
+            </p>
+            <p>
+              <strong>Username:</strong> {user.username}
             </p>
             <p>
               <strong>Email:</strong> {user.email}
